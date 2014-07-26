@@ -31,13 +31,14 @@ module Network.Haskoin.Crypto.ExtendedKeys
 ) where
 
 import Control.DeepSeq (NFData, rnf)
-import Control.Monad (guard, unless, when, liftM2)
+import Control.Monad (guard, unless, when)
 import Data.Binary (Binary, get, put)
 import Data.Binary.Get (Get, getWord8, getWord32be)
 import Data.Binary.Put (Put, runPut, putWord8, putWord32be)
 import Data.Word (Word8, Word32)
 import Data.Bits (shiftR, setBit, testBit, clearBit)
 import Data.Maybe (mapMaybe)
+import Data.Functor ((<$>))
 import qualified Data.ByteString as BS (ByteString, append)
 
 import Network.Haskoin.Util
@@ -139,23 +140,24 @@ primeSubKey xkey child = guardIndex child >> do
           msg   = BS.append (bsPadPrvKey $ xPrvKey xkey) (encode' i)
           (a,c) = split512 $ hmac512 (encode' $ xPrvChain xkey) msg
 
+subKeys :: (Word32 -> Maybe key) -> Word32 -> [(key,Word32)]
+subKeys subKey i = mapMaybe f $ cycleIndex i
+    where f j = (\x->(x,j)) <$> subKey j
+
 -- | Cyclic list of all private non-prime child key derivations of a parent key
 -- starting from an offset index.
 prvSubKeys :: XPrvKey -> Word32 -> [(XPrvKey,Word32)]
-prvSubKeys k i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (prvSubKey k j) (return j)
+prvSubKeys = subKeys . prvSubKey
 
 -- | Cyclic list of all public non-prime child key derivations of a parent key
 -- starting from an offset index.
 pubSubKeys :: XPubKey -> Word32 -> [(XPubKey,Word32)]
-pubSubKeys k i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (pubSubKey k j) (return j)
+pubSubKeys = subKeys . pubSubKey
 
 -- | Cyclic list of all prime child key derivations of a parent key starting
 -- from an offset index.
 primeSubKeys :: XPrvKey -> Word32 -> [(XPrvKey,Word32)]
-primeSubKeys k i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (primeSubKey k j) (return j)
+primeSubKeys = subKeys . primeSubKey
 
 -- | Compute a public, non-prime subkey derivation for all of the parent public
 -- keys in the input. This function will succeed only if the child key
@@ -173,8 +175,7 @@ mulSigSubKey pubs i = mapM (flip pubSubKey i) pubs
 -- | Cyclic list of all public, non-prime multisig key derivations of a list
 -- of parent keys starting from an offset index.
 mulSigSubKeys :: [XPubKey] -> Word32 -> [([XPubKey],Word32)]
-mulSigSubKeys pubs i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (mulSigSubKey pubs j) (return j)
+mulSigSubKeys = subKeys . mulSigSubKey
 
 cycleIndex :: Word32 -> [Word32]
 cycleIndex i
