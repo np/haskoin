@@ -6,6 +6,7 @@ module Network.Haskoin.Transaction.Builder
 , SigInput(..)
 , signTx
 , signInput
+, buildInput
 , detSignTx
 , detSignInput
 , verifyTx
@@ -347,29 +348,32 @@ verifyTx tx xs =
         soE = decodeOutput out
     go _             = False
 
+verifyInput' :: Tx -> Int -> ScriptInput -> ScriptOutput -> Bool
+verifyInput' tx i si so =
+  case si of
+    RegularInput (SpendPK (TxSignature sig sh)) ->
+      let pub = getOutputPubKey so
+      in  verifySig (txSigHash tx out i sh) sig pub
+    RegularInput (SpendPKHash (TxSignature sig sh) pub) ->
+      let a = getOutputAddress so
+      in pubKeyAddr pub == a && verifySig (txSigHash tx out i sh) sig pub
+    RegularInput (SpendMulSig sigs) ->
+      let pubs = getOutputMulSigKeys so
+          r    = getOutputMulSigRequired so
+      in  countMulSig tx out i pubs sigs == r
+    ScriptHashInput si rdm ->
+      scriptAddr rdm == getOutputAddress so && verifyInput' tx i (RegularInput si) rdm
+  where
+    out = encodeOutput so
+
 verifyInput :: Tx -> Int -> ScriptOutput -> Bool
 verifyInput tx i so' = 
     go (scriptInput $ txIn tx !! i) so'
   where
     go inp so = case decodeInputBS inp of
-        Right (RegularInput (SpendPK (TxSignature sig sh))) -> 
-            let pub = getOutputPubKey so
-            in  verifySig (txSigHash tx out i sh) sig pub
-        Right (RegularInput (SpendPKHash (TxSignature sig sh) pub)) ->
-            let a = getOutputAddress so
-            in pubKeyAddr pub == a && 
-                verifySig (txSigHash tx out i sh) sig pub
-        Right (RegularInput (SpendMulSig sigs)) ->
-            let pubs = getOutputMulSigKeys so
-                r    = getOutputMulSigRequired so
-            in  countMulSig tx out i pubs sigs == r
-        Right (ScriptHashInput si rdm) ->
-            scriptAddr rdm == getOutputAddress so && 
-            go (encodeInputBS $ RegularInput si) rdm
-        _ -> False
-      where
-        out = encodeOutput so
-                      
+        Right si -> verifyInput' tx i si so
+        Left  _  -> False
+
 -- Count the number of valid signatures
 countMulSig :: Tx -> Script -> Int -> [PubKey] -> [TxSignature] -> Int
 countMulSig _ _ _ [] _  = 0

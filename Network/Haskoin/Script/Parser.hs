@@ -68,6 +68,7 @@ data ScriptOutput =
                     }
       -- | Pay to a script hash.
     | PayScriptHash { getOutputAddress  :: !Address }
+    | PayScript     { getOutputScript   :: !Script }
     deriving (Eq, Show, Read)
 
 instance FromJSON ScriptOutput where
@@ -83,6 +84,7 @@ instance NFData ScriptOutput where
     rnf (PayPKHash a) = rnf a
     rnf (PayMulSig k r) = rnf k `seq` rnf r
     rnf (PayScriptHash a) = rnf a
+    rnf (PayScript s) = rnf s
 
 -- | Returns True if the script is a pay to public key output.
 isPayPK :: ScriptOutput -> Bool
@@ -149,6 +151,7 @@ encodeOutput s = Script $ case s of
                              ]
         (PubKeyAddress _) -> 
             error "encodeOutput: PubKeyAddress is invalid in PayScriptHash"
+    PayScript (Script ops) -> ops
 
 -- | Similar to 'encodeOutput' but encodes to a ByteString
 encodeOutputBS :: ScriptOutput -> BS.ByteString
@@ -175,13 +178,13 @@ decodeOutputBS = (decodeOutput =<<) . decodeToEither
 
 -- Match [ OP_N, PubKey1, ..., PubKeyM, OP_M, OP_CHECKMULTISIG ]
 matchPayMulSig :: Script -> Either String ScriptOutput
-matchPayMulSig (Script ops) = case splitAt (length ops - 2) ops of
+matchPayMulSig s@(Script ops) = case splitAt (length ops - 2) ops of
     (m:xs,[n,OP_CHECKMULTISIG]) -> do
         (intM,intN) <- liftM2 (,) (scriptOpToInt m) (scriptOpToInt n)
         if intM <= intN && length xs == intN 
             then liftM2 PayMulSig (go xs) (return intM)
             else Left "matchPayMulSig: Invalid M or N parameters"
-    _ -> Left "matchPayMulSig: script did not match output template"
+    _ -> Right (PayScript s)
   where 
     go (OP_PUSHDATA bs _:xs) = liftM2 (:) (decodeToEither bs) (go xs)
     go [] = return []
