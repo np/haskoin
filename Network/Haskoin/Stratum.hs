@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveDataTypeable #-}
 module Network.Haskoin.Stratum
@@ -10,20 +11,21 @@ module Network.Haskoin.Stratum
 , StratumCoin(..)
 ) where
 
-import Control.Applicative ((<$>), (<*>))
-import Control.DeepSeq (NFData, rnf)
-import Control.Monad (mzero)
+import safe Control.Applicative ((<$>), (<*>))
+import safe Control.DeepSeq (NFData, rnf)
+import safe Control.Monad (mzero)
 
-import Data.Aeson
-import Data.Maybe (listToMaybe)
-import Data.Text (Text)
-import qualified Data.Text as T
-import Data.Word (Word, Word64)
+import {-unsafe-} Data.Aeson
 
-import Network.JsonRpc
+import safe Data.Maybe (listToMaybe)
+import safe Data.Text (Text)
+import safe qualified Data.Text as T
+import safe Data.Word (Word, Word64)
 
-import Network.Haskoin.Crypto
-import Network.Haskoin.Protocol
+import {-unsafe-} Network.JsonRpc
+
+import safe Network.Haskoin.Crypto
+import safe Network.Haskoin.Protocol
 
 --
 -- Stratum Request

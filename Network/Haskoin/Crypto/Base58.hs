@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Network.Haskoin.Crypto.Base58
@@ -10,16 +11,11 @@ module Network.Haskoin.Crypto.Base58
 , decodeBase58Check
 ) where
 
-import Control.DeepSeq (NFData, rnf)
-import Control.Monad (guard)
-import Control.Applicative ((<$>),(<*>))
+import safe Control.DeepSeq (NFData, rnf)
+import safe Control.Monad (guard)
+import safe Control.Applicative ((<$>),(<*>))
 
-import Data.Char (ord, chr)
-import Data.Word (Word8)
-import Data.Maybe (fromJust, isJust, listToMaybe)
-import Numeric (showIntAtBase, readInt)
-import Data.String (fromString)
-import Data.Aeson
+import {-unsafe-} Data.Aeson
     ( Value (String)
     , FromJSON
     , ToJSON
@@ -28,14 +24,20 @@ import Data.Aeson
     , withText 
     )
 
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as B8
-import qualified Data.Text as T
+import safe Data.Char (ord, chr)
+import safe Data.Word (Word8)
+import safe Data.Maybe (fromJust, isJust, listToMaybe)
+import safe Numeric (showIntAtBase, readInt)
+import safe Data.String (fromString)
 
-import Network.Haskoin.Crypto.BigWord
-import Network.Haskoin.Crypto.Hash
-import Network.Haskoin.Constants
-import Network.Haskoin.Util 
+import safe qualified Data.ByteString as BS
+import safe qualified Data.ByteString.Char8 as B8
+import safe qualified Data.Text as T
+
+import safe Network.Haskoin.Crypto.BigWord
+import safe Network.Haskoin.Crypto.Hash
+import safe Network.Haskoin.Constants
+import safe Network.Haskoin.Util
 
 b58Data :: BS.ByteString
 b58Data = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"

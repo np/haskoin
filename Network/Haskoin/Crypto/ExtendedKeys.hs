@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 module Network.Haskoin.Crypto.ExtendedKeys
 ( XPubKey(..)
 , XPrvKey(..)
@@ -32,27 +33,28 @@ module Network.Haskoin.Crypto.ExtendedKeys
 , addPrvKeys
 ) where
 
-import Control.DeepSeq (NFData, rnf)
-import Control.Monad (mzero, guard, unless, when, liftM2)
+import safe Control.DeepSeq (NFData, rnf)
+import safe Control.Monad (mzero, guard, unless, when, liftM2)
 
-import Data.Aeson (Value(String), FromJSON, ToJSON, parseJSON, toJSON, withText)
-import Data.Binary (Binary, get, put)
-import Data.Binary.Get (Get, getWord8, getWord32be)
-import Data.Binary.Put (Put, runPut, putWord8, putWord32be)
-import Data.Word (Word8, Word32)
-import Data.Bits (shiftR, setBit, testBit, clearBit)
-import Data.Maybe (mapMaybe)
-import qualified Data.Text as T (pack, unpack)
-import qualified Data.ByteString as BS (ByteString, append)
+import {-unsafe-} Data.Aeson (Value(String), FromJSON, ToJSON, parseJSON, toJSON, withText)
 
-import Network.Haskoin.Util
-import Network.Haskoin.Constants
-import Network.Haskoin.Crypto.Keys
-import Network.Haskoin.Crypto.Hash
-import Network.Haskoin.Crypto.Base58
-import Network.Haskoin.Crypto.BigWord
-import Network.Haskoin.Crypto.Curve
-import Network.Haskoin.Crypto.Point
+import safe Data.Binary (Binary, get, put)
+import safe Data.Binary.Get (Get, getWord8, getWord32be)
+import safe Data.Binary.Put (Put, runPut, putWord8, putWord32be)
+import safe Data.Word (Word8, Word32)
+import safe Data.Bits (shiftR, setBit, testBit, clearBit)
+import safe Data.Maybe (mapMaybe)
+import safe qualified Data.Text as T (pack, unpack)
+import safe qualified Data.ByteString as BS (ByteString, append)
+
+import safe Network.Haskoin.Util
+import safe Network.Haskoin.Constants
+import safe Network.Haskoin.Crypto.Keys
+import safe Network.Haskoin.Crypto.Hash
+import safe Network.Haskoin.Crypto.Base58
+import safe Network.Haskoin.Crypto.BigWord
+import safe Network.Haskoin.Crypto.Curve
+import safe Network.Haskoin.Crypto.Point
 
 {- See BIP32 for details: https://en.bitcoin.it/wiki/BIP_0032 -}
 

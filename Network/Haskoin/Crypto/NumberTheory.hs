@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 module Network.Haskoin.Crypto.NumberTheory
 ( extendedModGCD
 , mulInverse

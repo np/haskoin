@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 module Network.Haskoin.Protocol.Types 
 ( Addr(..)
 , NetworkAddressTime 
@@ -36,16 +37,17 @@ module Network.Haskoin.Protocol.Types
 , MessageCommand(..)
 ) where
 
-import Control.DeepSeq (NFData, rnf)
-import Control.Monad (liftM2, replicateM, forM_, unless)
-import Control.Applicative ((<$>),(<*>))
+import {-unsafe-} Data.Aeson (Value(String), FromJSON, ToJSON, parseJSON, toJSON, withText)
 
-import Data.Aeson (Value(String), FromJSON, ToJSON, parseJSON, toJSON, withText)
-import Data.Bits (testBit, setBit)
-import Data.Word (Word8, Word16, Word32, Word64)
-import qualified Data.Text as T
-import Data.Binary (Binary, get, put)
-import Data.Binary.Get 
+import safe Control.DeepSeq (NFData, rnf)
+import safe Control.Monad (liftM2, replicateM, forM_, unless)
+import safe Control.Applicative ((<$>),(<*>))
+
+import safe Data.Bits (testBit, setBit)
+import safe Data.Word (Word8, Word16, Word32, Word64)
+import safe qualified Data.Text as T
+import safe Data.Binary (Binary, get, put)
+import safe Data.Binary.Get
     ( Get
     , getWord8
     , getWord16le
@@ -56,7 +58,7 @@ import Data.Binary.Get
     , getByteString
     , isEmpty
     )
-import Data.Binary.Put 
+import safe Data.Binary.Put
     ( Put
     , putWord8
     , putWord16le
@@ -66,16 +68,16 @@ import Data.Binary.Put
     , putWord64be
     , putByteString
     )
-import qualified Data.Foldable as F (toList)
-import qualified Data.Sequence as S (Seq, fromList, length)
-import qualified Data.ByteString as BS 
+import safe qualified Data.Foldable as F (toList)
+import safe qualified Data.Sequence as S (Seq, fromList, length)
+import safe qualified Data.ByteString as BS
     ( ByteString
     , length
     , takeWhile
     )
 
-import Network.Haskoin.Util 
-import Network.Haskoin.Crypto.BigWord
+import safe Network.Haskoin.Util
+import safe Network.Haskoin.Crypto.BigWord
 
 -- | Network address with a timestamp
 type NetworkAddressTime = (Word32, NetworkAddress)

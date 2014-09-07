@@ -2,6 +2,7 @@
   This module defines various utility functions used across the 
   Network.Haskoin modules.
 -}
+{-# LANGUAGE Safe #-}
 module Network.Haskoin.Util
 ( 
   -- * ByteString helpers

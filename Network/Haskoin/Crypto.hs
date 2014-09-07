@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 {-|
   This package provides the elliptic curve cryptography required for creating
   and validating bitcoin transactions. It also provides SHA-256 and RIPEMD-160

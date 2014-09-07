@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE OverloadedStrings #-}
 -- | Mnemonic keys (BIP-39). Only the English dictionary in the BIP is
 -- supported.
@@ -20,17 +21,17 @@ module Network.Haskoin.Crypto.Mnemonic
 , getBits
 ) where
 
-import Control.Monad (when)
-import qualified Crypto.Hash.SHA256 as SHA256
-import Crypto.PBKDF.ByteString (sha512PBKDF2)
-import Data.Bits ((.&.), shiftL, shiftR)
-import Data.ByteString (ByteString)
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as B8
-import Data.Char (isAscii)
-import Data.List
-import Data.Maybe
-import Network.Haskoin.Util (bsToInteger, integerToBS)
+import safe Control.Monad (when)
+import {-unsafe-} qualified Crypto.Hash.SHA256 as SHA256
+import {-unsafe-} Crypto.PBKDF.ByteString (sha512PBKDF2)
+import safe Data.Bits ((.&.), shiftL, shiftR)
+import safe Data.ByteString (ByteString)
+import safe qualified Data.ByteString as BS
+import safe qualified Data.ByteString.Char8 as B8
+import safe Data.Char (isAscii)
+import safe Data.List
+import safe Data.Maybe
+import safe Network.Haskoin.Util (bsToInteger, integerToBS)
 
 type Entropy = ByteString
 type Mnemonic = String

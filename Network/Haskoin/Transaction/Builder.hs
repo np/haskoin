@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE OverloadedStrings #-}
 module Network.Haskoin.Transaction.Builder 
 ( Coin(..)
@@ -17,17 +18,17 @@ module Network.Haskoin.Transaction.Builder
 , getMSFee
 ) where
 
-import Control.Applicative ((<$>),(<*>))
-import Control.Monad (mzero, foldM)
-import Control.Monad.Trans (lift)
-import Control.Monad.Trans.Either (EitherT, left)
-import Control.DeepSeq (NFData, rnf)
+import safe Control.Applicative ((<$>),(<*>))
+import safe Control.Monad (mzero, foldM)
+import safe Control.Monad.Trans (lift)
+import safe Control.Monad.Trans.Either (EitherT, left)
+import safe Control.DeepSeq (NFData, rnf)
 
-import Data.Maybe (catMaybes, maybeToList, isJust, fromJust, isNothing)
-import Data.List (sortBy, find, nub)
-import Data.Word (Word64)
-import qualified Data.ByteString as BS (length, replicate, empty)
-import Data.Aeson
+import safe Data.Maybe (catMaybes, maybeToList, isJust, fromJust, isNothing)
+import safe Data.List (sortBy, find, nub)
+import safe Data.Word (Word64)
+import safe qualified Data.ByteString as BS (length, replicate, empty)
+import {-unsafe-} Data.Aeson
     ( Value (Object)
     , FromJSON
     , ToJSON
@@ -37,10 +38,10 @@ import Data.Aeson
     , toJSON
     )
 
-import Network.Haskoin.Util
-import Network.Haskoin.Crypto
-import Network.Haskoin.Protocol
-import Network.Haskoin.Script
+import safe Network.Haskoin.Util
+import safe Network.Haskoin.Crypto
+import safe Network.Haskoin.Protocol
+import safe Network.Haskoin.Script
 
 -- | A Coin is an output of a transaction that can be spent by another
 -- transaction. 

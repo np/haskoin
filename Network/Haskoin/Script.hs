@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 {-|
   This package provides functions for parsing and evaluating bitcoin
   transaction scripts. Data types are provided for building and

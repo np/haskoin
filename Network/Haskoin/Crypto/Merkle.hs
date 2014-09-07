@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 module Network.Haskoin.Crypto.Merkle 
 ( calcTreeHeight
 , calcTreeWidth

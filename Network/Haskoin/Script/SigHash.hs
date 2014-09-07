@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 module Network.Haskoin.Script.SigHash
 ( SigHash(..)
 , encodeSigHash32
@@ -12,16 +13,17 @@ module Network.Haskoin.Script.SigHash
 , decodeCanonicalSig
 ) where
 
-import Control.DeepSeq (NFData, rnf)
-import Control.Monad (liftM2, mzero)
+import safe Control.DeepSeq (NFData, rnf)
+import safe Control.Monad (liftM2, mzero)
 
-import Data.Word (Word8)
-import Data.Bits (testBit, clearBit, setBit)
-import Data.Maybe (fromMaybe)
-import Data.Binary (Binary, get, put, getWord8, putWord8)
-import Data.Aeson (Value(String), FromJSON, ToJSON, parseJSON, toJSON, withText)
-import qualified Data.Text as T
-import qualified Data.ByteString as BS 
+import {-unsafe-} Data.Aeson (Value(String), FromJSON, ToJSON, parseJSON, toJSON, withText)
+
+import safe Data.Word (Word8)
+import safe Data.Bits (testBit, clearBit, setBit)
+import safe Data.Maybe (fromMaybe)
+import safe Data.Binary (Binary, get, put, getWord8, putWord8)
+import safe qualified Data.Text as T
+import safe qualified Data.ByteString as BS
     ( ByteString
     , index
     , length
@@ -32,12 +34,12 @@ import qualified Data.ByteString as BS
     , empty
     )
 
-import Network.Haskoin.Crypto.BigWord
-import Network.Haskoin.Crypto.Hash
-import Network.Haskoin.Crypto.ECDSA
-import Network.Haskoin.Script.Types
-import Network.Haskoin.Protocol
-import Network.Haskoin.Util
+import safe Network.Haskoin.Crypto.BigWord
+import safe Network.Haskoin.Crypto.Hash
+import safe Network.Haskoin.Crypto.ECDSA
+import safe Network.Haskoin.Script.Types
+import safe Network.Haskoin.Protocol
+import safe Network.Haskoin.Util
 
 -- | Data type representing the different ways a transaction can be signed.
 -- When producing a signature, a hash of the transaction is used as the message

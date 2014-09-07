@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 {-|
   This package provides all of the basic types used for the Bitcoin 
   networking protocol together with Data.Binary instances for efficiently

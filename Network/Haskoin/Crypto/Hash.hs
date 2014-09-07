@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 -- | Hashing functions and HMAC DRBG definition
 module Network.Haskoin.Crypto.Hash
 ( CheckSum32
@@ -31,9 +32,9 @@ module Network.Haskoin.Crypto.Hash
 , headerHash
 ) where
 
-import Control.Monad (replicateM)
+import safe Control.Monad (replicateM)
 
-import Crypto.Hash 
+import {-unsafe-} Crypto.Hash
     ( Digest
     , SHA512
     , SHA256
@@ -41,13 +42,13 @@ import Crypto.Hash
     , RIPEMD160
     , hash
     )
-import Crypto.MAC.HMAC (hmac)
+import {-unsafe-} Crypto.MAC.HMAC (hmac)
+import {-unsafe-} Data.Byteable (toBytes)
 
-import Data.Word (Word16, Word32)
-import Data.Byteable (toBytes)
-import Data.Binary (Binary, get)
-import Data.Binary.Get (getWord32le)
-import Data.Bits 
+import safe Data.Word (Word16, Word32)
+import safe Data.Binary (Binary, get)
+import safe Data.Binary.Get (getWord32le)
+import safe Data.Bits
     ( shiftL
     , shiftR
     , rotateL
@@ -55,7 +56,7 @@ import Data.Bits
     , (.&.), (.|.)
     )
 
-import qualified Data.ByteString as BS 
+import safe qualified Data.ByteString as BS
     ( ByteString
     , null
     , append
@@ -68,9 +69,9 @@ import qualified Data.ByteString as BS
     , drop
     )
 
-import Network.Haskoin.Util 
-import Network.Haskoin.Crypto.BigWord 
-import Network.Haskoin.Protocol.Types
+import safe Network.Haskoin.Util
+import safe Network.Haskoin.Crypto.BigWord
+import safe Network.Haskoin.Protocol.Types
 
 type CheckSum32 = Word32
 

@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 {-|
   This module expose haskoin internals. No guarantee is made on the
   stability of the interface of these internal modules.

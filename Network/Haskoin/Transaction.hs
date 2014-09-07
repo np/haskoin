@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 {-|
   This package provides functions for building and signing both simple
   transactions and multisignature transactions.

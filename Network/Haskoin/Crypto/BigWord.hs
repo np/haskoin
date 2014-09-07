@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE EmptyDataDecls #-}
+{-# LANGUAGE Trustworthy #-}
 module Network.Haskoin.Crypto.BigWord
 (
 -- Useful type aliases
@@ -27,7 +28,7 @@ module Network.Haskoin.Crypto.BigWord
 , decodeBlockHashLE
 ) where
 
-import Data.Bits 
+import safe Data.Bits
     ( Bits
     , (.&.), (.|.), xor
     , complement
@@ -35,21 +36,21 @@ import Data.Bits
     , bit, testBit, bitSize
     , popCount, isSigned
     )
-import Data.Binary (Binary, get, put)
-import Data.Binary.Get 
+import safe Data.Binary (Binary, get, put)
+import safe Data.Binary.Get
     ( getWord64be
     , getWord32be
     , getWord8
     , getByteString
     , Get
     )
-import Data.Binary.Put 
+import safe Data.Binary.Put
     ( putWord64be
     , putWord32be
     , putWord8
     , putByteString
     )
-import Data.Aeson
+import {-unsafe-} Data.Aeson
     ( Value (String)
     , FromJSON
     , ToJSON
@@ -57,16 +58,16 @@ import Data.Aeson
     , toJSON
     , withText
     )
-import Control.DeepSeq (NFData, rnf)
-import Control.Monad (unless, guard)
-import Control.Applicative ((<$>))
-import Data.Ratio (numerator, denominator)
-import qualified Data.ByteString as BS (head, length, reverse)
-import qualified Data.Text as T (pack, unpack)
+import safe Control.DeepSeq (NFData, rnf)
+import safe Control.Monad (unless, guard)
+import safe Control.Applicative ((<$>))
+import safe Data.Ratio (numerator, denominator)
+import safe qualified Data.ByteString as BS (head, length, reverse)
+import safe qualified Data.Text as T (pack, unpack)
 
-import Network.Haskoin.Crypto.Curve 
-import Network.Haskoin.Crypto.NumberTheory 
-import Network.Haskoin.Util 
+import safe Network.Haskoin.Crypto.Curve
+import safe Network.Haskoin.Crypto.NumberTheory
+import safe Network.Haskoin.Util
 
 -- | Type representing a transaction hash.
 type TxHash  = BigWord Mod256Tx

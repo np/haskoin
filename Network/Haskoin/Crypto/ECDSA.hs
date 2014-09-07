@@ -1,3 +1,4 @@
+{-# LANGUAGE Safe #-}
 -- | ECDSA Signatures
 module Network.Haskoin.Crypto.ECDSA
 ( SecretT

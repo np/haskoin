@@ -1,3 +1,4 @@
+{-# LANGUAGE Trustworthy #-}
 module Network.Haskoin.Script.Parser
 ( ScriptOutput(..)
 , ScriptInput(..)
@@ -27,19 +28,19 @@ module Network.Haskoin.Script.Parser
 , isScriptHashInput
 ) where
 
-import Control.DeepSeq (NFData, rnf)
-import Control.Monad (liftM2, guard)
-import Control.Applicative ((<$>), (<|>))
+import safe Control.DeepSeq (NFData, rnf)
+import safe Control.Monad (liftM2, guard)
+import safe Control.Applicative ((<$>), (<|>))
 
-import Data.List (sortBy)
-import Data.Foldable (foldrM)
-import qualified Data.Text as T
-import qualified Data.ByteString as BS 
+import safe Data.List (sortBy)
+import safe Data.Foldable (foldrM)
+import safe qualified Data.Text as T
+import safe qualified Data.ByteString as BS
     ( ByteString
     , head
     , singleton
     )
-import Data.Aeson
+import {-unsafe-} Data.Aeson
     ( Value (String)
     , FromJSON
     , ToJSON
@@ -47,12 +48,12 @@ import Data.Aeson
     , toJSON
     , withText
     )
-import Network.Haskoin.Util
-import Network.Haskoin.Crypto.Keys
-import Network.Haskoin.Crypto.Base58
-import Network.Haskoin.Crypto.Hash
-import Network.Haskoin.Script.Types
-import Network.Haskoin.Script.SigHash
+import safe Network.Haskoin.Util
+import safe Network.Haskoin.Crypto.Keys
+import safe Network.Haskoin.Crypto.Base58
+import safe Network.Haskoin.Crypto.Hash
+import safe Network.Haskoin.Script.Types
+import safe Network.Haskoin.Script.SigHash
 
 -- | Data type describing standard transaction output scripts. Output scripts
 -- provide the conditions that must be fulfilled for someone to spend the
