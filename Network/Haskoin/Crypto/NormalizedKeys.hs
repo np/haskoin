@@ -39,11 +39,11 @@ module Network.Haskoin.Crypto.NormalizedKeys
 ) where
 
 import Control.DeepSeq (NFData, rnf)
-import Control.Monad (liftM2, guard)
+import Control.Monad (guard)
 import Control.Applicative ((<$>))
 
 import Data.Word (Word32)
-import Data.Maybe (mapMaybe, fromJust, isJust)
+import Data.Maybe (fromJust, isJust)
 import qualified Data.ByteString as BS (ByteString)
 
 import Network.Haskoin.Crypto.ExtendedKeys
@@ -170,43 +170,37 @@ intPrvKey (AccPrvKey par) i = AddrPrvKey <$> prvSubKey intKey i
 -- index.
 intPubKey :: AccPubKey -> KeyIndex -> Maybe AddrPubKey
 intPubKey (AccPubKey par) i = AddrPubKey <$> pubSubKey intKey i
-    where intKey = fromJust $ pubSubKey par 1
+    where intKey = fromJust $ pubSubKey par 1 -- THESE fromJust could be avoided
 
 -- | Cyclic list of all valid 'AccPrvKey' derived from a 'MasterKey' and
 -- starting from an offset index.
 accPrvKeys :: MasterKey -> KeyIndex -> [(AccPrvKey,KeyIndex)]
-accPrvKeys m i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (accPrvKey m j) (return j)
+accPrvKeys = subKeys . accPrvKey
 
 -- | Cyclic list of all valid 'AccPubKey' derived from a 'MasterKey' and
 -- starting from an offset index.
 accPubKeys :: MasterKey -> KeyIndex -> [(AccPubKey,KeyIndex)]
-accPubKeys m i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (accPubKey m j) (return j)
+accPubKeys = subKeys . accPubKey
 
 -- | Cyclic list of all valid external 'AddrPrvKey' derived from a 'AccPrvKey'
 -- and starting from an offset index.
 extPrvKeys :: AccPrvKey -> KeyIndex -> [(AddrPrvKey,KeyIndex)]
-extPrvKeys a i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (extPrvKey a j) (return j)
+extPrvKeys = subKeys . extPrvKey
 
 -- | Cyclic list of all valid external 'AddrPubKey' derived from a 'AccPubKey'
 -- and starting from an offset index.
 extPubKeys :: AccPubKey -> KeyIndex -> [(AddrPubKey,KeyIndex)]
-extPubKeys a i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (extPubKey a j) (return j)
+extPubKeys = subKeys . extPubKey
 
 -- | Cyclic list of all internal 'AddrPrvKey' derived from a 'AccPrvKey' and
 -- starting from an offset index.
 intPrvKeys :: AccPrvKey -> KeyIndex -> [(AddrPrvKey,KeyIndex)]
-intPrvKeys a i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (intPrvKey a j) (return j)
+intPrvKeys = subKeys . intPrvKey
 
 -- | Cyclic list of all internal 'AddrPubKey' derived from a 'AccPubKey' and
 -- starting from an offset index.
 intPubKeys :: AccPubKey -> KeyIndex -> [(AddrPubKey,KeyIndex)]
-intPubKeys a i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (intPubKey a j) (return j)
+intPubKeys = subKeys . intPubKey
 
 {- Generate addresses -}
 
@@ -227,24 +221,20 @@ intAddr a i = addr <$> intPubKey a i
 -- | Cyclic list of all external addresses derived from a 'AccPubKey'
 -- and starting from an offset index.
 extAddrs :: AccPubKey -> KeyIndex -> [(Address,KeyIndex)]
-extAddrs a i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (extAddr a j) (return j)
+extAddrs = subKeys . extAddr
 
 -- | Cyclic list of all internal addresses derived from a 'AccPubKey'
 -- and starting from an offset index.
 intAddrs :: AccPubKey -> KeyIndex -> [(Address,KeyIndex)]
-intAddrs a i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (intAddr a j) (return j)
+intAddrs = subKeys . intAddr
 
 -- | Same as 'extAddrs' with the list reversed.
 extAddrs' :: AccPubKey -> KeyIndex -> [(Address,KeyIndex)]
-extAddrs' a i = mapMaybe f $ cycleIndex' i
-    where f j = liftM2 (,) (extAddr a j) (return j)
+extAddrs' = subKeys' . extAddr
 
 -- | Same as 'intAddrs' with the list reversed.
 intAddrs' :: AccPubKey -> KeyIndex -> [(Address,KeyIndex)]
-intAddrs' a i = mapMaybe f $ cycleIndex' i
-    where f j = liftM2 (,) (intAddr a j) (return j)
+intAddrs' = subKeys' . intAddr
 
 {- MultiSig -}
 
@@ -267,14 +257,12 @@ intMulSigKey a ps i = (map AddrPubKey) <$> mulSigSubKey keys i
 -- | Cyclic list of all external multisignature 'AddrPubKey' derivations 
 -- starting from an offset index.
 extMulSigKeys :: AccPubKey -> [XPubKey] -> KeyIndex -> [([AddrPubKey],KeyIndex)]
-extMulSigKeys a ps i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (extMulSigKey a ps j) (return j)
+extMulSigKeys a ps = subKeys (extMulSigKey a ps)
 
 -- | Cyclic list of all internal multisignature 'AddrPubKey' derivations
 -- starting from an offset index.
 intMulSigKeys :: AccPubKey -> [XPubKey] -> KeyIndex -> [([AddrPubKey],KeyIndex)]
-intMulSigKeys a ps i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (intMulSigKey a ps j) (return j)
+intMulSigKeys a ps = subKeys (intMulSigKey a ps)
 
 -- | Computes an external multisig address from an 'AccPubKey', a
 -- list of thirdparty multisig keys and a derivation index.
@@ -295,14 +283,12 @@ intMulSigAddr a ps r i = do
 -- at an offset index.
 extMulSigAddrs :: AccPubKey -> [XPubKey] -> Int -> KeyIndex 
               -> [(Address,KeyIndex)]
-extMulSigAddrs a ps r i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (extMulSigAddr a ps r j) (return j)
+extMulSigAddrs a ps r = subKeys (extMulSigAddr a ps r)
 
 -- | Cyclic list of all internal multisig addresses derived from
 -- an 'AccPubKey' and a list of thirdparty multisig keys. The list starts
 -- at an offset index.
 intMulSigAddrs :: AccPubKey -> [XPubKey] -> Int -> KeyIndex 
               -> [(Address,KeyIndex)]
-intMulSigAddrs a ps r i = mapMaybe f $ cycleIndex i
-    where f j = liftM2 (,) (intMulSigAddr a ps r j) (return j)
+intMulSigAddrs a ps r = subKeys (intMulSigAddr a ps r)
 

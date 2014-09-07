@@ -28,6 +28,12 @@ module Network.Haskoin.Crypto.ExtendedKeys
 , xPrvWIF
 , cycleIndex
 , cycleIndex'
+, xPrvTree
+, xPrimeTree
+, xPubTree
+, subKeys
+, subKeys'
+, keyTree
 ) where
 
 import Control.DeepSeq (NFData, rnf)
@@ -39,6 +45,7 @@ import Data.Word (Word8, Word32)
 import Data.Bits (shiftR, setBit, testBit, clearBit)
 import Data.Maybe (mapMaybe)
 import Data.Functor ((<$>))
+import Data.Tree (Tree, unfoldTree)
 import qualified Data.ByteString as BS (ByteString, append)
 
 import Network.Haskoin.Util
@@ -140,9 +147,29 @@ primeSubKey xkey child = guardIndex child >> do
           msg   = BS.append (bsPadPrvKey $ xPrvKey xkey) (encode' i)
           (a,c) = split512 $ hmac512 (encode' $ xPrvChain xkey) msg
 
+-- | Given a key derivation function, return a cyclic list of derived
+-- keys starting from an offset index.
 subKeys :: (Word32 -> Maybe key) -> Word32 -> [(key,Word32)]
 subKeys subKey i = mapMaybe f $ cycleIndex i
     where f j = (\x->(x,j)) <$> subKey j
+
+-- | Same as 'subKeys' but the list is reversed.
+subKeys' :: (Word32 -> Maybe key) -> Word32 -> [(key,Word32)]
+subKeys' subKey i = mapMaybe f $ cycleIndex' i
+    where f j = (\x->(x,j)) <$> subKey j
+
+keyTree :: (key -> Word32 -> Maybe key) -> key -> Tree key
+keyTree subKey = unfoldTree f
+  where f k = (k , mapMaybe (subKey k) (cycleIndex 0))
+
+xPrvTree :: XPrvKey -> Tree XPrvKey
+xPrvTree = keyTree prvSubKey
+
+xPrimeTree :: XPrvKey -> Tree XPrvKey
+xPrimeTree = keyTree primeSubKey
+
+xPubTree :: XPubKey -> Tree XPubKey
+xPubTree = keyTree pubSubKey
 
 -- | Cyclic list of all private non-prime child key derivations of a parent key
 -- starting from an offset index.
