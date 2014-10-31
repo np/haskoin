@@ -1,4 +1,5 @@
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE OverloadedStrings #-}
 -- | Mnemonic keys (BIP-39). Only the English dictionary in the BIP is
 -- supported.
@@ -22,7 +23,7 @@ module Network.Haskoin.Crypto.Mnemonic
 ) where
 
 import safe Control.Monad (when)
-import {-unsafe-} qualified Crypto.Hash.SHA256 as SHA256
+
 import {-unsafe-} Crypto.PBKDF.ByteString (sha512PBKDF2)
 import safe Data.Bits ((.&.), shiftL, shiftR)
 import safe Data.ByteString (ByteString)
@@ -32,6 +33,7 @@ import safe Data.Char (isAscii)
 import safe Data.List
 import safe Data.Maybe
 import safe Network.Haskoin.Util (bsToInteger, integerToBS)
+import safe Network.Haskoin.Crypto.Hash (hash256BS)
 
 type Entropy = ByteString
 type Mnemonic = String
@@ -81,7 +83,7 @@ fromMnemonic ms = do
     sh cs_a cs_b = show cs_a ++ " /= " ++ show cs_b
 
 calcCS :: Int -> Entropy -> Checksum
-calcCS len = getBits len . SHA256.hash
+calcCS len = getBits len . hash256BS
 
 numCS :: Int -> Entropy -> Integer
 numCS len = shiftCS . bsToInteger

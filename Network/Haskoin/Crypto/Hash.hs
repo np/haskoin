@@ -1,4 +1,5 @@
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP #-}
 -- | Hashing functions and HMAC DRBG definition
 module Network.Haskoin.Crypto.Hash
 ( CheckSum32
@@ -34,6 +35,16 @@ module Network.Haskoin.Crypto.Hash
 
 import safe Control.Monad (replicateM)
 
+#if PURE_HASH
+import safe Data.Digest.Pure.SHA
+    ( bytestringDigest
+    , sha512
+    , sha256
+    , sha1
+    , hmacSha512
+    , hmacSha256
+    )
+#else
 import {-unsafe-} Crypto.Hash
     ( Digest
     , SHA512
@@ -44,6 +55,7 @@ import {-unsafe-} Crypto.Hash
     )
 import {-unsafe-} Crypto.MAC.HMAC (hmac)
 import {-unsafe-} Data.Byteable (toBytes)
+#endif
 
 import safe Data.Word (Word16, Word32)
 import safe Data.Binary (Binary, get)
@@ -75,17 +87,38 @@ import safe Network.Haskoin.Protocol.Types
 
 type CheckSum32 = Word32
 
+#if PURE_HASH
+runHash h = toStrictBS . bytestringDigest . h . toLazyBS
+#endif
+
+
 run512 :: BS.ByteString -> BS.ByteString
+#if PURE_HASH
+run512 = runHash sha512 -- toStrictBS . bytestringDigest . sha512 . toLazyBS
+#else
 run512 = (toBytes :: Digest SHA512 -> BS.ByteString) . hash
+#endif
 
 run256 :: BS.ByteString -> BS.ByteString
+#if PURE_HASH
+run256 = toStrictBS . bytestringDigest . sha256 . toLazyBS
+#else
 run256 = (toBytes :: Digest SHA256 -> BS.ByteString) . hash
+#endif
 
 run160 :: BS.ByteString -> BS.ByteString
+#if PURE_HASH
+run160 = undefined
+#else
 run160 = (toBytes :: Digest RIPEMD160 -> BS.ByteString) . hash
+#endif
 
 runSha1 :: BS.ByteString -> BS.ByteString
+#if PURE_HASH
+runSha1 = toStrictBS . bytestringDigest . sha1 . toLazyBS
+#else
 runSha1 = (toBytes :: Digest SHA1 -> BS.ByteString) . hash
+#endif
 
 -- | Computes SHA-512.
 hash512 :: BS.ByteString -> Word512
@@ -141,7 +174,12 @@ hmac512 key = decode' . (hmac512BS key)
 
 -- | Computes HMAC over SHA-512 and return the result as a bytestring.
 hmac512BS :: BS.ByteString -> BS.ByteString -> BS.ByteString
+#if PURE_HASH
+hmac512BS key msg = toStrictBS . bytestringDigest
+                  $ hmacSha512 (toLazyBS key) (toLazyBS msg)
+#else
 hmac512BS key msg = hmac hash512BS 128 key msg
+#endif
 
 -- | Computes HMAC over SHA-256.
 hmac256 :: BS.ByteString -> BS.ByteString -> Word256
@@ -149,7 +187,12 @@ hmac256 key = decode' . (hmac256BS key)
 
 -- | Computes HMAC over SHA-256 and return the result as a bytestring.
 hmac256BS :: BS.ByteString -> BS.ByteString -> BS.ByteString
+#if PURE_HASH
+hmac256BS key msg = toStrictBS . bytestringDigest
+                  $ hmacSha256 (toLazyBS key) (toLazyBS msg)
+#else
 hmac256BS key msg = hmac hash256BS 64 key msg
+#endif
 
 -- | Split a 'Word512' into a pair of 'Word256'.
 split512 :: Word512 -> (Word256, Word256)
